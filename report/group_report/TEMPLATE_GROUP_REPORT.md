@@ -121,26 +121,68 @@ Guardrail events:
 
 ## 4. Root Cause Analysis (RCA) - Failure Traces
 
-*Deep dive into why the agent failed.*
+### Case Study 1: Out-of-Domain Free-Style Answer
 
-### Case Study: [e.g., Hallucinated Argument]
-- **Input**: "How much is the tax for 500 in Vietnam?"
-- **Observation**: Agent called `calc_tax(amount=500, region="Asia")` while the tool only accepts 2-letter country codes.
-- **Root Cause**: The system prompt lacked enough `Few-Shot` examples for the tool's strict argument format.
+- **Input**: "Giáo trình học AI cho sinh viên bách khoa dưới 5 triệu"
+- **Initial Observation**: The LLM could answer this as a normal education-budget request, but that violates the selected Vin travel domain.
+- **Root Cause**: A general-purpose LLM tends to follow any helpful user request unless the app layer enforces a product boundary.
+- **Fix in Agent v2**: Added domain guard before LLM call. Non-travel questions now return a short redirect to Vin/Vinpearl/VinWonders travel planning.
+- **Evidence**: `AGENT_OUT_OF_DOMAIN` and `CHATBOT_OUT_OF_DOMAIN` events are logged; tests assert the answer does not include the unrelated education content.
+
+### Case Study 2: User Asked Which Tool Was Used
+
+- **Input**: "Bạn đã dùng tool gì để lên kế hoạch trên?"
+- **Initial Observation**: A raw LLM answer may expose tool inventory or internal implementation details.
+- **Root Cause**: User-facing answer and debugging trace were not clearly separated.
+- **Fix in Agent v2**: Added internal-tool/system-prompt guard. The chat answer does not list internal tools; the Streamlit UI shows execution details in the trace panel below the answer.
+- **Evidence**: `AGENT_INTERNAL_QUESTION` and `CHATBOT_INTERNAL_QUESTION` events are logged; automated tests assert `hotel_lookup` and `system prompt` are not revealed in the answer.
+
+### Case Study 3: Malformed / Missing ReAct Action
+
+- **Input**: Travel request where the model returned blank content or multiple actions in a single turn.
+- **Observation**: The parser could not safely execute the intended action.
+- **Root Cause**: Small/fast models may not follow a strict ReAct schema consistently.
+- **Fix in Agent v2**: Added deterministic fallback routing based on query features: destination, days, people, budget, and preferences. The fallback calls `hotel_lookup`, `ticket_offer_lookup`, and `itinerary_planner` in a safe order.
+- **Evidence**: `AGENT_PARSE_FALLBACK` events appear in telemetry; final answers can still be built from tool observations.
+
+### Case Study 4: Max-Step Timeout
+
+- **Input**: Repeated planning request where the model kept asking for more tool calls.
+- **Observation**: Without a step cap, the loop could waste latency and cost.
+- **Root Cause**: ReAct loops need explicit termination control.
+- **Fix in Agent v2**: `max_steps` stops the loop and returns a fallback answer from observations already collected.
+- **Evidence**: `max_steps` status appears in logs and has automated coverage.
 
 ---
 
 ## 5. Ablation Studies & Experiments
 
 ### Experiment 1: Prompt v1 vs Prompt v2
-- **Diff**: [e.g., Adding "Always double check the tool arguments before calling".]
-- **Result**: Reduced invalid tool call errors by [e.g., 30%].
 
-### Experiment 2 (Bonus): Chatbot vs Agent
+- **Prompt v1**: Basic ReAct instruction with tool list and action format.
+- **Problem**: Model sometimes returned direct prose, blank text, or multiple actions.
+- **Prompt v2**: Added stricter rules: one step only, raw JSON in action parentheses, never invent observation, and use tools for concrete travel facts.
+- **Result**: ReAct behavior became easier to parse and monitor. Remaining failures are recovered by deterministic fallback logic.
+
+### Experiment 2: Agent v1 vs Agent v2
+
+| Capability | Agent v1 | Agent v2 | Result |
+| :--- | :--- | :--- | :--- |
+| ReAct loop | Basic loop | Loop with parser, max steps, final answer extraction | v2 better |
+| Tool handling | Executes valid actions | Adds unknown-tool and malformed-action fallback | v2 better |
+| Domain safety | Mostly prompt-based | App-level guard before LLM call | v2 better |
+| Internal tool leakage | Possible | Guarded answer plus trace panel | v2 better |
+| Cost/latency monitoring | Basic logs | Token, latency, cost, LLM call, tool call, loop count | v2 better |
+
+### Experiment 3: Chatbot vs Agent
+
 | Case | Chatbot Result | Agent Result | Winner |
 | :--- | :--- | :--- | :--- |
-| Simple Q | Correct | Correct | Draw |
-| Multi-step | Hallucinated | Correct | **Agent** |
+| Simple VinWonders FAQ | Can answer directly, but may be generic | Can answer directly or tool-ground when needed | Draw |
+| Phú Quốc 3 days, 3 people, 10M budget, beach preference | May hallucinate prices or miss sources | Calls travel tools and returns itinerary, cost, warning, sources | **Agent** |
+| Nha Trang 2 days, 5M budget | Gives general suggestion | Uses itinerary/hotel/ticket observations and flags budget pressure | **Agent** |
+| Out-of-domain education budget | Now redirects because of guard | Redirects because of guard | Draw |
+| Asked "what tool did you use?" | Refuses to expose internals | Refuses in answer, shows trace below chat | **Agent** |
 
 ---
 
