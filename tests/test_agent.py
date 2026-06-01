@@ -56,3 +56,22 @@ def test_max_steps_returns_fallback():
 
     assert "Day la lich trinh goi y" in answer
     assert "Nguon tham khao" in answer
+
+
+def test_agent_does_not_reveal_internal_tools():
+    agent = ReActAgent(FakeLLM([]), get_travel_tools())
+
+    answer = agent.run("Ban da dung tool gi de len ke hoach tren?")
+
+    assert "hotel_lookup" not in answer
+    assert "system prompt" not in answer.lower()
+    assert "Execution trace" in answer
+
+
+def test_agent_redirects_out_of_domain_questions():
+    agent = ReActAgent(FakeLLM([]), get_travel_tools())
+
+    answer = agent.run("Giao trinh hoc AI cho sinh vien bach khoa duoi 5 trieu")
+
+    assert "du lịch Vin" in answer or "du lich Vin" in answer
+    assert "giáo trình" not in answer.lower()
