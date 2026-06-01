@@ -209,5 +209,32 @@ Guardrail events:
 
 ---
 
+## 8. Rubric Mapping and Self-Assessment
+
+| Rubric Category | Points | Evidence in Project | Status |
+| :--- | ---: | :--- | :--- |
+| Chatbot Baseline | 2 | `src/chatbot.py`, direct LLM path, telemetry, domain guard | Achieved |
+| Agent v1 Working | 7 | `src/agent/agent.py`, ReAct loop, 3 tools, final answer extraction | Achieved |
+| Agent v2 Improved | 7 | fallback action routing, max steps, domain guard, internal-tool guard | Achieved |
+| Tool Design Evolution | 4 | tool schema, mock data with sources/warnings, itinerary cost estimate | Achieved |
+| Trace Quality | 9 | successful traces, failed traces, JSON logs, Streamlit execution trace | Achieved |
+| Evaluation and Analysis | 7 | metric table, chatbot vs agent comparison, 17/17 tests | Achieved |
+| Flowchart and Insight | 5 | Mermaid flowchart and RCA sections | Achieved |
+| Code Quality | 4 | modular provider/agent/tools/telemetry/UI/test structure | Achieved |
+
+Bonus mapping:
+
+| Bonus Category | Points | Evidence | Status |
+| :--- | ---: | :--- | :--- |
+| Extra Monitoring | +3 | cost estimate, token count, latency, loop count, tool call logs | Achieved |
+| Extra Tools | +2 | 3 domain tools plus UI trace/debug panels for demo | Achieved |
+| Failure Handling | +3 | fallback routing, max-step guard, unknown-tool handling, out-of-domain guard | Achieved |
+| Live System Demo | +5 | Streamlit app at `http://127.0.0.1:8501/` and HTML/backend demo path | Achieved |
+| Ablation Experiments | +2 | Prompt v1/v2, Agent v1/v2, Chatbot vs Agent analysis | Achieved |
+
+**Conclusion**: The project satisfies the full group-report criteria for Lab 3 and is ready for demo/submission as the group component.
+
+---
+
 > [!NOTE]
-> Submit this report by renaming it to `GROUP_REPORT_[TEAM_NAME].md` and placing it in this folder.
+> This report follows `report/group_report/TEMPLATE_GROUP_REPORT.md` and should be submitted as the group report for the Vin Travel Concierge Agent team.
