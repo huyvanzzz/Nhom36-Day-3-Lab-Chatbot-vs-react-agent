@@ -188,11 +188,24 @@ Guardrail events:
 
 ## 6. Production Readiness Review
 
-*Considerations for taking this system to a real-world environment.*
+- **Security**: API keys are read from `.env` only. The app does not print secrets in normal logs. Internal tools, raw schemas, and system prompt are not exposed in final chat answers.
+- **Guardrails**: Domain guard, internal-tool guard, max-step limit, unknown-tool error observation, and fallback answer builder are implemented.
+- **Monitoring**: JSON logs include LLM call metrics, token usage, estimated cost, latency, tool call events, loop count, and error/fallback events. Streamlit shows these traces under each message.
+- **Code Quality**: The system is modular: provider layer, provider factory, chatbot baseline, ReAct agent, tools, telemetry, CLI demo, HTTP backend, and Streamlit UI are separated.
+- **Testing**: The final suite validates parser behavior, final answer detection, unknown tool handling, max-step fallback, provider config mapping, travel tool outputs, domain guard, and internal-tool guard.
+- **Scaling Path**: For production, replace mock data with official APIs or RAG over verified Vinpearl/VinWonders documents, add persistent session storage, add evaluation datasets, and move the agent graph to LangGraph or a similar state-machine framework.
 
-- **Security**: [e.g., Input sanitization for tool arguments.]
-- **Guardrails**: [e.g., Max 5 loops to prevent infinite billing cost.]
-- **Scaling**: [e.g., Transition to LangGraph for more complex branching.]
+---
+
+## 7. Contribution Breakdown
+
+| Member | Student ID | Main Responsibility | Concrete Output |
+| :--- | :--- | :--- | :--- |
+| Trần Quốc Khánh | 2A202600679 | Agent Core and integration | ReAct loop, parser flow, final answer handling, Streamlit/HTML demo integration, final validation. |
+| Nguyễn Anh Kiệt | 2A202600677 | Tools and mock data | `hotel_lookup`, `ticket_offer_lookup`, `itinerary_planner`, Phú Quốc/Nha Trang mock data, source URL and warning format. |
+| Nguyễn Văn Huy | 2A202600773 | Provider/config layer | OpenAI-compatible gateway setup, `.env` parsing, `xmtp/mimo-v2.5` and `xmtp/mimo-v2.5-pro` model selection, CLI flags. |
+| Nhan Khánh Đình | 2A202600673 | Telemetry and tests | Token/latency/cost tracking, JSON event logs, parser/provider/tool tests, failure trace collection. |
+| Nguyễn Ngọc Hảo | 2A202600903 | Report and demo script | Group report, rubric mapping, successful/failed trace documentation, live demo checklist. |
 
 ---
 
