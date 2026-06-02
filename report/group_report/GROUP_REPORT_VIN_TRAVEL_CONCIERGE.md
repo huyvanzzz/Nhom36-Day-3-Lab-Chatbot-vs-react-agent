@@ -6,7 +6,7 @@
   - Nguyễn Anh Kiệt - 2A202600677
   - Nguyễn Văn Huy - 2A202600773
   - Nhan Khánh Đình - 2A202600673
-  - Nguyễn Ngọc Hào - 2A202600903
+  - Nguyễn Ngọc Hảo - 2A202600903
 - **Deployment Date**: 2026-06-01
 - **Demo Domain**: Vin/Vinpearl/VinWonders travel concierge for Phú Quốc and Nha Trang
 
@@ -205,7 +205,7 @@ Guardrail events:
 | Nguyễn Anh Kiệt | 2A202600677 | Tools and mock data | `hotel_lookup`, `ticket_offer_lookup`, `itinerary_planner`, Phú Quốc/Nha Trang mock data, source URL and warning format. |
 | Nguyễn Văn Huy | 2A202600773 | Provider/config layer | OpenAI-compatible gateway setup, `.env` parsing, `xmtp/mimo-v2.5` and `xmtp/mimo-v2.5-pro` model selection, CLI flags. |
 | Nhan Khánh Đình | 2A202600673 | Telemetry and tests | Token/latency/cost tracking, JSON event logs, parser/provider/tool tests, failure trace collection. |
-| Nguyễn Ngọc Hào | 2A202600903 | Report and demo script | Group report, rubric mapping, successful/failed trace documentation, live demo checklist. |
+| Nguyễn Ngọc Hảo | 2A202600903 | Report and demo script | Group report, rubric mapping, successful/failed trace documentation, live demo checklist. |
 
 ---
 
